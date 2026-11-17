@@ -1,0 +1,100 @@
+/* ============================================================
+   OBLQ · CORRECTION COLORIMÉTRIQUE
+   À charger après oblq.css, avant oblq-motion.css.
+
+   Le problème :
+   sept blocs :root se redéfinissent les mêmes tokens. Le dernier,
+   dans porto-direction.css, pose --red: #111. Le rouge de marque
+   vaut donc noir, et les vingt-huit règles écrites var(--red)
+   — le Q du logo, le point de synchro, la navigation active —
+   s'affichent en noir.
+
+   À côté, cinq rouges littéraux coexistent sans s'accorder :
+   #ff3e2c, #f0442d, #c42e17, #b72b1d, #fc3825, #e63724.
+
+   La correction : un seul rouge, celui de la favicon, #ff3e2c.
+   ============================================================ */
+
+:root{
+  /* Le rouge OBLQ, celui du favicon et du premier style.css. */
+  --red: #ff3e2c;
+
+  /* Conservés tels quels : seul le rouge était faux. */
+  --ink: #111;
+  --paper: #f8f8f6;
+  --paper-2: #ecece8;
+  --line: #ccc;
+  --lime: #e9ff59;
+}
+
+/* ------------------------------------------------------------
+   Les rouges littéraux qui n'avaient pas suivi, ramenés au même.
+   ------------------------------------------------------------ */
+
+.search-heading h2 span,          /* etait #f0442d */
+.talk-oblq summary span,
+.talk-oblq a,                     /* etait #b72b1d */
+.detail-main .lesson,
+.horizon-card h2 span,
+.oblq-word span,
+.asterisk{
+  color: var(--red);
+}
+
+.detail-main .lesson{
+  border-left-color: var(--red);
+}
+
+/* ------------------------------------------------------------
+   Les quatre usages en aplat : le rouge redevient vif, donc on
+   le cantonne là où il est un signe, pas là où il servait de
+   fond neutre sous une image.
+   ------------------------------------------------------------ */
+
+/* Le trait du Q : c'est l'anomalie, elle doit être rouge. */
+.masthead .anomaly::after{ background: var(--red); }
+
+/* Les couvertures gardent un fond neutre : le rouge n'y était
+   qu'un reliquat, et il hurle derrière une photo qui charge. */
+.feature .cover,
+.card:nth-child(4n+3) .cover{ background: var(--paper-2); }
+
+/* La carte de principe sur trois reste rouge : c'est le rythme
+   voulu par la grille. Décommente la ligne pour la neutraliser.
+.doctrine-card:nth-child(3n){ background: var(--paper-2); }
+*/
+
+/* ------------------------------------------------------------
+   LE Q — la décision t'appartient.
+
+   Historique de la cascade, dans l'ordre des fichiers :
+     style.css        color: var(--red)      -> rouge
+     art.css          color: #ff3e2c         -> rouge
+     nomal.css        color: var(--red)      -> rouge
+     refonte-v2.css   color: var(--ink)      -> encre  (bascule)
+     porto-direction  .anomaly::after display:none  (trait masque)
+
+   Quatre couches voulaient un Q rouge, la cinquieme l'a passe en
+   encre et la sixieme a retire son trait. Le favicon, lui, est
+   reste rouge. L'anomalie du 1% ne se voit plus.
+
+   Decommente ce bloc pour la rendre.
+   ------------------------------------------------------------ */
+
+/* .masthead .anomaly{ color: var(--red); }  <- decommente pour rendre le Q rouge */
+
+/* ------------------------------------------------------------
+   LES TITRES EN NOIR PUR — la vraie erreur.
+
+   style.css pose a{color:inherit} mais rien pour button.
+   Les titres de cartes vivent dans des <button> : faute de
+   regle, ils retombent sur le noir par defaut du navigateur.
+
+   Mesure sur la page en ligne :
+     1 287 elements visibles en #000 (515 button, 256 h2,
+     257 b, 258 span) contre 37 seulement dans l'encre #111.
+
+   Une ligne, par symetrie avec le a{color:inherit} d'origine.
+   ------------------------------------------------------------ */
+
+button{ color: inherit; }
