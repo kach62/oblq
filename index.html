@@ -54,12 +54,13 @@
 <script defer src="/media.js"></script>
 <script defer src="/prospective-data.js"></script>
 <script defer src="/prospective.js"></script>
+<!-- AVANT app.js : app.js appelle /api/collection des son execution,
+     l'intercepteur doit donc etre en place a ce moment-la. -->
+<script defer src="/oblq-collection.js"></script>
 <script defer src="/app.js"></script>
 <script defer src="/art.js"></script>
 <script defer src="/v2.js"></script>
 <script defer src="/porto-stage.js"></script>
-<!-- Après app.js : intercepte /api/collection pour le servir du cache. -->
-<script defer src="/oblq-collection.js"></script>
 <!-- En dernier : le calque de mouvement. -->
 <script defer src="/oblq-motion.js"></script>
 </body>
