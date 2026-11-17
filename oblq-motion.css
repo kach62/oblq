@@ -1,0 +1,421 @@
+/* ============================================================
+   OBLQ · MOTION LAYER  —  oblq-motion.css
+   À charger EN DERNIER, après porto-direction.css.
+   Doctrine : 99% control + 1% anomaly.
+   Une seule famille de courbes. Un seul langage de mouvement.
+   ============================================================ */
+
+:root{
+  /* ---- Courbes signature : 3 et pas une de plus ---- */
+  --ease-oblq:    cubic-bezier(.16, 1, .3, 1);     /* révélation, sortie  */
+  --ease-cut:     cubic-bezier(.65, 0, .35, 1);    /* changement d'état   */
+  --ease-anomaly: cubic-bezier(.34, 1.56, .64, 1); /* le 1% — overshoot   */
+
+  /* ---- Échelle de durées ---- */
+  --t-tap:    120ms;
+  --t-fast:   200ms;
+  --t-base:   420ms;
+  --t-slow:   720ms;
+  --t-reveal: 900ms;
+
+  /* ---- Rythme du stagger (cadence de tirage) ---- */
+  --stagger: 55ms;
+}
+
+/* ============================================================
+   01 · RÉVÉLATION AU SCROLL
+   Les références ne s'affichent pas : elles se posent,
+   comme des plaques sur un marbre d'imprimeur.
+   ============================================================ */
+
+[data-reveal]{
+  opacity: 0;
+  transform: translate3d(0, 22px, 0);
+  transition:
+    opacity   var(--t-reveal) var(--ease-oblq),
+    transform var(--t-reveal) var(--ease-oblq);
+  transition-delay: var(--reveal-delay, 0ms);
+  will-change: opacity, transform;
+}
+[data-reveal].is-in{
+  opacity: 1;
+  transform: none;
+}
+/* Libère la couche GPU une fois la révélation jouée */
+[data-reveal].is-done{ will-change: auto; }
+
+/* Variante : les titres arrivent par la gauche, comme un filet typo */
+.masthead [data-reveal],
+.search-heading [data-reveal]{
+  transform: translate3d(-18px, 0, 0);
+}
+
+/* Variante : la promesse éditoriale monte en bloc, plus lente */
+.editorial-promise[data-reveal]{
+  transform: translate3d(0, 34px, 0);
+  transition-duration: var(--t-reveal), var(--t-reveal);
+}
+
+/* ============================================================
+   02 · LES CARTES — survol
+   Pas d'ombre, pas de scale mou. Un décalage net + un filet rouge.
+   ============================================================ */
+
+.stage-news button,
+.stage-item,
+.stage-hero{
+  transition:
+    transform var(--t-base) var(--ease-oblq),
+    background-color var(--t-fast) var(--ease-cut),
+    color var(--t-fast) var(--ease-cut);
+}
+
+@media (hover: hover){
+  .stage-news button:hover,
+  .stage-item:hover{
+    transform: translate3d(0, -4px, 0);
+  }
+  /* Le filet qui se tire sous le titre */
+  .stage-news button h2{
+    display: inline;
+    background-image: linear-gradient(var(--red, #ff3e2c), var(--red, #ff3e2c));
+    background-repeat: no-repeat;
+    background-position: 0 100%;
+    background-size: 0% 2px;
+    transition: background-size var(--t-base) var(--ease-oblq);
+  }
+  .stage-news button:hover h2{ background-size: 100% 2px; }
+
+  /* L'image respire — contenue, jamais spectaculaire */
+  .stage-news button img,
+  .stage-hero img,
+  .stage-item img{
+    transition: transform var(--t-slow) var(--ease-oblq),
+                filter    var(--t-slow) var(--ease-oblq);
+  }
+  .stage-news button:hover img,
+  .stage-hero:hover img{
+    transform: scale(1.035);
+  }
+}
+
+/* Feedback tactile : le doigt doit sentir le clic */
+.stage-news button:active,
+.stage-item:active,
+.stage-hero:active{
+  transform: scale(.985);
+  transition-duration: var(--t-tap);
+}
+
+/* ============================================================
+   03 · NAVIGATION — l'état actif se déplace, il n'apparaît pas
+   ============================================================ */
+
+aside nav button,
+.collection-tools button{
+  position: relative;
+  transition: color var(--t-fast) var(--ease-cut),
+              opacity var(--t-fast) var(--ease-cut);
+}
+aside nav button::after{
+  content: "";
+  position: absolute;
+  left: 0; bottom: -2px;
+  height: 2px; width: 100%;
+  background: var(--red, #ff3e2c);
+  transform: scaleX(0);
+  transform-origin: 0 50%;
+  transition: transform var(--t-base) var(--ease-oblq);
+}
+aside nav button.active::after{ transform: scaleX(1); }
+@media (hover: hover){
+  aside nav button:hover::after{ transform: scaleX(.4); }
+}
+
+/* ============================================================
+   04 · LE 1% — l'anomalie du Q
+   Le seul élément du site autorisé à désobéir.
+   ============================================================ */
+
+h1 .anomaly{
+  display: inline-block;
+  transform-origin: 50% 60%;
+  transition: transform var(--t-slow) var(--ease-anomaly);
+}
+h1:hover .anomaly{
+  transform: rotate(-9deg) translateY(-2px);
+}
+/* Au chargement, le Q se met en place une fois, puis se tait */
+.oblq-ready h1 .anomaly{
+  animation: oblq-anomaly 1100ms var(--ease-anomaly) 1 both;
+}
+@keyframes oblq-anomaly{
+  0%   { transform: rotate(-14deg) translateY(6px); opacity: 0; }
+  60%  { opacity: 1; }
+  100% { transform: none; opacity: 1; }
+}
+
+/* ============================================================
+   05 · ÉTATS SYSTÈME — statut, recherche, modale
+   ============================================================ */
+
+/* Le point de synchro pulse : signe de vie, pas de décoration */
+header .red{
+  display: inline-block;
+  animation: oblq-pulse 2.4s var(--ease-cut) infinite;
+}
+@keyframes oblq-pulse{
+  0%, 100% { opacity: 1;   transform: scale(1); }
+  50%      { opacity: .35; transform: scale(.82); }
+}
+
+#syncStatus{
+  transition: opacity var(--t-base) var(--ease-cut),
+              transform var(--t-base) var(--ease-oblq);
+}
+#syncStatus.is-stale{ opacity: .45; }
+
+/* Champ de recherche : le focus ouvre, il ne clignote pas */
+.toolbar label.search{
+  transition: box-shadow var(--t-base) var(--ease-oblq),
+              transform  var(--t-base) var(--ease-oblq);
+}
+.toolbar label.search:focus-within{
+  transform: translate3d(0, -2px, 0);
+  box-shadow: 0 0 0 3px var(--lime, #d9fb51);
+}
+
+/* Pastilles de prompt */
+.search-prompts button{
+  transition: transform var(--t-fast) var(--ease-anomaly),
+              background-color var(--t-fast) var(--ease-cut);
+}
+@media (hover: hover){
+  .search-prompts button:hover{ transform: translate3d(0, -3px, 0); }
+}
+
+/* Panneau de filtres : hauteur animée sans JS */
+.filter-panel{
+  transition: background-color var(--t-base) var(--ease-cut);
+}
+.filter-panel > summary span{
+  display: inline-block;
+  transition: transform var(--t-base) var(--ease-anomaly);
+}
+.filter-panel[open] > summary span{ transform: rotate(180deg); }
+
+/* ============================================================
+   06 · MODALE — entrée par le bas, comme un cahier qu'on ouvre
+   ============================================================ */
+
+#detail{
+  border: 0;
+  opacity: 0;
+  transform: translate3d(0, 24px, 0) scale(.985);
+  transition:
+    opacity   var(--t-base) var(--ease-oblq),
+    transform var(--t-base) var(--ease-oblq),
+    overlay   var(--t-base) var(--ease-oblq) allow-discrete,
+    display   var(--t-base) var(--ease-oblq) allow-discrete;
+}
+#detail[open]{
+  opacity: 1;
+  transform: none;
+}
+@starting-style{
+  #detail[open]{
+    opacity: 0;
+    transform: translate3d(0, 24px, 0) scale(.985);
+  }
+}
+#detail::backdrop{
+  background: color-mix(in srgb, var(--ink, #11120f) 72%, transparent);
+  backdrop-filter: blur(3px);
+  opacity: 0;
+  transition:
+    opacity var(--t-base) var(--ease-cut),
+    overlay var(--t-base) var(--ease-cut) allow-discrete,
+    display var(--t-base) var(--ease-cut) allow-discrete;
+}
+#detail[open]::backdrop{ opacity: 1; }
+@starting-style{
+  #detail[open]::backdrop{ opacity: 0; }
+}
+
+/* ============================================================
+   07 · TOAST — il entre, il sort, il ne s'installe pas
+   ============================================================ */
+
+#toast{
+  transition:
+    opacity   var(--t-base) var(--ease-oblq),
+    transform var(--t-base) var(--ease-oblq);
+}
+#toast:not(.is-visible){
+  opacity: 0;
+  transform: translate3d(0, 12px, 0);
+  pointer-events: none;
+}
+#toast.is-visible{ opacity: 1; transform: none; }
+
+/* ============================================================
+   08 · CHANGEMENT DE VUE — View Transitions API
+   Dégradation silencieuse sur les navigateurs sans support.
+   ============================================================ */
+
+@media (prefers-reduced-motion: no-preference){
+  ::view-transition-old(root){
+    animation: oblq-vt-out 260ms var(--ease-cut) both;
+  }
+  ::view-transition-new(root){
+    animation: oblq-vt-in 380ms var(--ease-oblq) both;
+  }
+}
+@keyframes oblq-vt-out{
+  to { opacity: 0; transform: translate3d(0, -10px, 0); }
+}
+@keyframes oblq-vt-in{
+  from { opacity: 0; transform: translate3d(0, 14px, 0); }
+}
+
+/* ============================================================
+   09 · SQUELETTES DE CHARGEMENT
+   Remplace « Lecture de la collection… » figé.
+   ============================================================ */
+
+.oblq-skeleton{
+  position: relative;
+  overflow: hidden;
+  background: color-mix(in srgb, var(--line, #d4d5ce) 45%, transparent);
+  min-height: 1em;
+}
+.oblq-skeleton::after{
+  content: "";
+  position: absolute; inset: 0;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    color-mix(in srgb, var(--paper, #f5f5f1) 85%, transparent),
+    transparent
+  );
+  transform: translateX(-100%);
+  animation: oblq-sweep 1.4s var(--ease-cut) infinite;
+}
+@keyframes oblq-sweep{ to { transform: translateX(100%); } }
+
+/* ============================================================
+   10 · ACCESSIBILITÉ — non négociable
+   Un seul bloc. Tout se tait.
+   ============================================================ */
+
+@media (prefers-reduced-motion: reduce){
+  *, *::before, *::after{
+    animation-duration: .01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: .01ms !important;
+    scroll-behavior: auto !important;
+  }
+  [data-reveal]{ opacity: 1 !important; transform: none !important; }
+  .oblq-skeleton::after{ display: none; }
+  header .red{ animation: none; opacity: 1; }
+}
+
+/* ============================================================
+   11 · MORPHING CARTE → FICHE
+   La couverture de la carte cliquée devient la couverture de la
+   fiche. Un seul objet qui se déplace, pas deux écrans qui
+   se remplacent.
+   ============================================================ */
+
+@media (prefers-reduced-motion: no-preference){
+  /* Le nom est posé sur la carte cliquée par le JS, et ici sur la
+     couverture de la fiche : le navigateur relie les deux. */
+  #detailContent .cover img,
+  #detailContent > * img:first-of-type{
+    view-transition-name: oblq-cover;
+    contain: paint;
+  }
+  ::view-transition-group(oblq-cover){
+    animation-duration: 520ms;
+    animation-timing-function: var(--ease-oblq);
+  }
+  ::view-transition-old(oblq-cover),
+  ::view-transition-new(oblq-cover){
+    /* Pas de fondu croisé sur l'image : elle se déplace, elle ne clignote pas. */
+    animation: none;
+    mix-blend-mode: normal;
+    height: 100%;
+    object-fit: cover;
+  }
+}
+
+/* ============================================================
+   12 · MASTHEAD RÉACTIF
+   Le curseur déplace l'orbite et le Q de quelques pixels.
+   Amplitude volontairement faible : on doit le sentir sans le voir.
+   ============================================================ */
+
+.masthead{ --mx: 0; --my: 0; }
+
+@media (hover: hover) and (prefers-reduced-motion: no-preference){
+  .masthead .art-orbit{
+    transform: translate3d(calc(var(--mx) * 18px), calc(var(--my) * 14px), 0);
+    transition: transform 900ms var(--ease-oblq);
+  }
+  .masthead h1 .anomaly{
+    /* S'ajoute à la rotation au survol, sans l'écraser. */
+    translate: calc(var(--mx) * 6px) calc(var(--my) * 4px);
+    transition: translate 1100ms var(--ease-oblq),
+                transform var(--t-slow) var(--ease-anomaly);
+  }
+  .masthead .art-caption{
+    transform: translate3d(calc(var(--mx) * -7px), 0, 0);
+    transition: transform 1200ms var(--ease-oblq);
+  }
+}
+
+/* ============================================================
+   13 · SÉQUENCE D'OUVERTURE DE L'ÉDITION
+   Jouée une fois, au premier chargement. Tout finit à l'état
+   normal : la page est complète au repos, même si rien ne joue.
+   ============================================================ */
+
+@media (prefers-reduced-motion: no-preference){
+  .oblq-open aside{
+    animation: oblq-rail 760ms var(--ease-oblq) both;
+  }
+  .oblq-open header{
+    animation: oblq-fade 520ms var(--ease-cut) 120ms both;
+  }
+  .oblq-open .masthead .eyebrow{
+    animation: oblq-rise 620ms var(--ease-oblq) 200ms both;
+  }
+  .oblq-open .masthead #intro{
+    animation: oblq-rise 680ms var(--ease-oblq) 380ms both;
+  }
+  .oblq-open .editorial-promise{
+    animation: oblq-rise 720ms var(--ease-oblq) 480ms both;
+  }
+  /* Le filet sous le masthead se tire : la une s'ouvre comme une page. */
+  .oblq-open .masthead::after{
+    animation: oblq-rule 900ms var(--ease-oblq) 260ms both;
+    transform-origin: 0 50%;
+  }
+}
+
+@keyframes oblq-rail{
+  from{ opacity: 0; transform: translate3d(-24px, 0, 0); }
+  to  { opacity: 1; transform: none; }
+}
+@keyframes oblq-fade{ from{ opacity: 0 } to{ opacity: 1 } }
+@keyframes oblq-rise{
+  from{ opacity: 0; transform: translate3d(0, 16px, 0); }
+  to  { opacity: 1; transform: none; }
+}
+@keyframes oblq-rule{ from{ transform: scaleX(0) } to{ transform: scaleX(1) } }
+
+@media (prefers-reduced-motion: reduce){
+  .masthead .art-orbit,
+  .masthead h1 .anomaly,
+  .masthead .art-caption{ translate: none; transform: none }
+}

@@ -1,0 +1,69 @@
+# ============================================================
+#  OBLQ · configuration de déploiement
+# ============================================================
+
+[build]
+  publish = "."
+  command = ""
+
+# ------------------------------------------------------------
+#  L'API reste chez ChatGPT. Le front passe sur Netlify.
+#
+#  /api/collection, /api/ask et /api/pulse sont servis par ton
+#  app ChatGPT : leur code est côté serveur, je ne l'ai pas.
+#  Cette règle les reproxifie (status 200 = réécriture, pas
+#  redirection), donc le front migre aujourd'hui sans toucher
+#  au back-end. Le jour où tu voudras rapatrier l'API, tu
+#  remplaces cette règle par des fonctions Netlify.
+# ------------------------------------------------------------
+[[redirects]]
+  from = "/api/*"
+  to = "https://creative-radar-14h28.jeromekaczmarek.chatgpt.site/api/:splat"
+  status = 200
+  force = true
+
+# La page /explorer existe dans la navigation : à créer, ou à
+# rediriger vers l'accueil en attendant.
+[[redirects]]
+  from = "/explorer"
+  to = "/index.html"
+  status = 200
+
+# ------------------------------------------------------------
+#  Cache
+# ------------------------------------------------------------
+
+# Le HTML est revalidé à chaque fois : c'est lui qui désigne les assets.
+[[headers]]
+  for = "/index.html"
+  [headers.values]
+    Cache-Control = "public, max-age=0, must-revalidate"
+
+# CSS et JS : une heure de cache ferme, puis resservis depuis le cache
+# pendant la revalidation. Plus de requête bloquante au rechargement.
+[[headers]]
+  for = "/*.css"
+  [headers.values]
+    Cache-Control = "public, max-age=3600, stale-while-revalidate=86400"
+
+[[headers]]
+  for = "/*.js"
+  [headers.values]
+    Cache-Control = "public, max-age=3600, stale-while-revalidate=86400"
+
+# Le repli hors-ligne ne bouge qu'au déploiement : un jour de cache.
+[[headers]]
+  for = "/data-fallback.json"
+  [headers.values]
+    Cache-Control = "public, max-age=86400, stale-while-revalidate=604800"
+
+# ------------------------------------------------------------
+#  En-têtes de sécurité
+# ------------------------------------------------------------
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "strict-origin-when-cross-origin"
+    X-Frame-Options = "SAMEORIGIN"
+    Permissions-Policy = "geolocation=(), microphone=(), camera=()"
